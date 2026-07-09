@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, computed_field
 from typing import Literal, Annotated
 import pickle
@@ -80,5 +81,26 @@ class UserInput(BaseModel):
         
         
 
-
+# creating predict endpoint         
+@app.post("/predict")
+def predict_premium(data: UserInput):
+    df = pd.DataFrame([
+        {
+            "bmi": data.bmi,
+            "age_group": data.ageGroup,
+            "lifestyle_risk": data.lifeStyle_risk,
+            "city_tier": data.city_tier,  
+            "income_lpa": data.income_lpa,
+            "occupation": data.occupation
+        }
+    ])
+    
+    prediction = model.predict(df)[0]
+    
+    return JSONResponse(status_code=200, content={"predicted_category": prediction})
    
+   
+   
+   
+
+# to run fastapi ---> uvicorn app:app --reload
