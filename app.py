@@ -103,4 +103,4 @@ def predict_premium(data: UserInput):
    
    
 
-# to run fastapi ---> uvicorn app:app --reload
+# to run fastapi ---> uvicorn app:app --reload 
