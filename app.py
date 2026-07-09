@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator
 from typing import Literal, Annotated
 import pickle
 import pandas as pd
@@ -9,7 +9,11 @@ import pandas as pd
 #import the model
 with open("model/model.pkl", "rb") as f:
     model = pickle.load(f)
-    
+
+
+#model version --> this usually comes from MLFlow
+MODEL_VERSION = "1.0.0"
+  
 
 # make a FastAPI instance
 app = FastAPI()
@@ -39,6 +43,14 @@ class UserInput(BaseModel):
     city: Annotated[str, Field(..., description="The city user lives in")]
     occupation: Annotated[Literal["retired", "freelancer", "student", "government_job", "business_owner", "unemployed", "private_job" ], Field(..., description="Occupation of the user")]
     
+    
+    
+    
+    @field_validator("city")
+    @classmethod
+    def normalize_city(cls, value: str) -> str:
+        value = value.strip().title()
+        return value
     
     @computed_field
     @property
@@ -79,7 +91,24 @@ class UserInput(BaseModel):
             return 3
         
         
-        
+# creating a root endpoint
+@app.get("/")
+def home():
+    return {
+        "message": "Insurance Premium Prediction API",
+    }
+
+
+
+# health check endpoint -> it is for machine readable
+@app.get("/health")
+def health_check():
+     return {
+         "status": "ok",
+         "version": MODEL_VERSION,
+         "model_loaded": model is not None
+     }
+
 
 # creating predict endpoint         
 @app.post("/predict")
