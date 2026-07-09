@@ -12,7 +12,7 @@ with open("model/model.pkl", "rb") as f:
 MODEL_VERSION = "1.0.0"
 
 # Getting class labels from model  this is important for matching probabilities to class names
-class_labels = model.classes_tolist()
+class_labels = model.classes_.tolist()
 
 
 def predict_output(user_input: dict):
